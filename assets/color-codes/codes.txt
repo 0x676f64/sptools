@@ -1,0 +1,23 @@
+
+
+1. #000000 - Black
+2. #353c44 - Silver
+3. #342a24 - Brown
+4. #46494a - Grey
+5. #b04814 - Orange 
+6  #232425 - Off-Black
+7. #687886 - Grey
+8. #dea387 - Pale Orange 
+9. #88929b - Light Silver 
+
+
+Soft Modern UI
+=================
+Black - #383836
+Dark Grey - #71706c
+Light Grey - cfcec8
+Metal Background - #e8efef
+Orange buttons - #fa8866
+Orange - #d57c54
+Light Orange - #f9d3ac
+Dark Theme Surface - #5f605d
