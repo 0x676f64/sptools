@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '/pages/signin_page.dart';
+import '/pages/signup_page.dart';
+import '/pages/guest_page.dart';
 
 class IntroPage extends StatelessWidget {
   const IntroPage({super.key});
@@ -8,68 +11,84 @@ class IntroPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF0A0A0A), // Set background to #0a0a0a
+      backgroundColor: const Color(0xFF0A0A0A),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(height: MediaQuery.of(context).size.height * 0.3), // Spacer to adjust the position
+          SizedBox(height: MediaQuery.of(context).size.height * 0.3),
           Center(
             child: SvgPicture.asset(
-              'assets/images/SP-Tools-USA.svg', // Updated path to the SVG
-              height: 140, // Adjusted height for a smaller size
-              width: 140, // Maintain aspect ratio with a smaller width
+              'assets/images/SP_Bold_Outline_White.svg',
+              height: 140,
+              width: 140,
             ),
           ),
-          Spacer(),
+          const SizedBox(height: 20),
+          const Spacer(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               children: [
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SignInPage()),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFF26722), // Button color
+                    backgroundColor: const Color(0xFFF26722),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20), // Border radius
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    minimumSize: Size(double.infinity, 50), // Full-width button
+                    minimumSize: const Size(double.infinity, 50),
                   ),
                   child: Text(
                     "Sign In",
                     style: GoogleFonts.rubik(
                       color: Colors.white,
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
                 OutlinedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SignUpPage()),
+                    );
+                  },
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Color(0xFFF26722), width: 3), // Border color and width
+                    side: const BorderSide(color: Color(0xFFF26722), width: 3),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20), // Border radius
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    minimumSize: Size(double.infinity, 50), // Full-width button
+                    minimumSize: const Size(double.infinity, 50),
                   ),
                   child: Text(
                     "Sign Up",
                     style: GoogleFonts.rubik(
                       color: Colors.white,
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
                 GestureDetector(
-                  onTap: () {}, // Add navigation logic here
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const GuestPage()),
+                    );
+                  },
                   child: Text(
                     "Continue As Guest",
                     style: GoogleFonts.rubik(
                       color: Colors.grey,
-                      fontSize: 18,
+                      fontSize: 20,
                       decoration: TextDecoration.underline,
                     ),
                   ),
@@ -77,7 +96,7 @@ class IntroPage extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
         ],
       ),
     );
