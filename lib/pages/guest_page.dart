@@ -4,10 +4,10 @@ class GuestPage extends StatefulWidget {
   const GuestPage({super.key});
 
   @override
-  _GuestPageState createState() => _GuestPageState();
+  GuestPageState createState() => GuestPageState();
 }
 
-class _GuestPageState extends State<GuestPage> {
+class GuestPageState extends State<GuestPage> {
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
@@ -33,26 +33,116 @@ class _GuestPageState extends State<GuestPage> {
         unselectedItemColor: Colors.grey,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+            icon: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/images/icon-sp-2.png',
+                  height: 50,
+                  width: 50,
+                  color: _selectedIndex == 0 ? const Color(0xFFF26722) : Colors.grey,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Home',
+                  style: TextStyle(
+                    color: _selectedIndex == 0 ? const Color(0xFFF26722) : Colors.grey,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag),
-            label: 'Products',
+            icon: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/images/tools.png',
+                  height: 30,
+                  width: 30,
+                  color: _selectedIndex == 1 ? const Color(0xFFF26722) : Colors.grey,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Products',
+                  style: TextStyle(
+                    color: _selectedIndex == 1 ? const Color(0xFFF26722) : Colors.grey,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Wishlist',
+            icon: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/images/heart.png',
+                  height: 30,
+                  width: 30,
+                  color: _selectedIndex == 2 ? const Color(0xFFF26722) : Colors.grey,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Wishlist',
+                  style: TextStyle(
+                    color: _selectedIndex == 2 ? const Color(0xFFF26722) : Colors.grey,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long),
-            label: 'Orders',
+            icon: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/images/box-open.png',
+                  height: 30,
+                  width: 30,
+                  color: _selectedIndex == 3 ? const Color(0xFFF26722) : Colors.grey,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Orders',
+                  style: TextStyle(
+                    color: _selectedIndex == 3 ? const Color(0xFFF26722) : Colors.grey,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.more_horiz),
-            label: 'More',
+            icon: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/images/dot-pending.png',
+                  height: 30,
+                  width: 30,
+                  color: _selectedIndex == 4 ? const Color(0xFFF26722) : Colors.grey,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'More',
+                  style: TextStyle(
+                    color: _selectedIndex == 4 ? const Color(0xFFF26722) : Colors.grey,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            label: '',
           ),
         ],
       ),
