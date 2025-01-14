@@ -29,7 +29,9 @@ class GuestPageState extends State<GuestPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A),
-      body: _selectedIndex == 0 ? _buildHomePage() : Center(
+      body: _selectedIndex == 0
+          ? _buildHomePage()
+          : Center(
         child: Text(
           'Page: ${_getPageName(_selectedIndex)}',
           style: const TextStyle(color: Colors.white, fontSize: 24),
@@ -104,26 +106,26 @@ class GuestPageState extends State<GuestPage> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 100.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
                 'SP Tools Home',
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
               Stack(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.shopping_cart,
-                    color: Colors.white,
+                    color: Colors.grey,
                     size: 30,
                   ),
-                  if (_cartItemCount > 0)
+                  if (_cartItemCount == 0)
                     Positioned(
                       right: 0,
                       top: 0,
@@ -153,65 +155,58 @@ class GuestPageState extends State<GuestPage> {
             ],
           ),
         ),
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const SizedBox(height: 50),
-              CarouselSlider(
-                options: CarouselOptions(
-                  height: 200,
-                  viewportFraction: 0.9,
-                  enlargeCenterPage: true,
-                  onPageChanged: (index, reason) {
-                    setState(() {
-                      _currentPromoIndex = index;
-                    });
-                  },
-                ),
-                items: promoImages.map((image) {
-                  return Builder(
-                    builder: (BuildContext context) {
-                      return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10.0),
-                          color: Colors.white,
-                          image: DecorationImage(
-                            image: AssetImage(image),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                }).toList(),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: promoImages.asMap().entries.map((entry) {
-                  return GestureDetector(
-                    onTap: () => setState(() {
-                      _currentPromoIndex = entry.key;
-                    }),
-                    child: Container(
-                      width: 8.0,
-                      height: 8.0,
-                      margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: _currentPromoIndex == entry.key
-                            ? const Color(0xFFF26722)
-                            : Colors.grey,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16),
-            ],
+        const SizedBox(height: 8.0), // Smaller gap between title and carousel
+        CarouselSlider(
+          options: CarouselOptions(
+            height: 180,
+            viewportFraction: 0.9,
+            enlargeCenterPage: true,
+            onPageChanged: (index, reason) {
+              setState(() {
+                _currentPromoIndex = index;
+              });
+            },
           ),
+          items: promoImages.map((image) {
+            return Builder(
+              builder: (BuildContext context) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    color: Colors.white,
+                    image: DecorationImage(
+                      image: AssetImage(image),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                );
+              },
+            );
+          }).toList(),
         ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: promoImages.asMap().entries.map((entry) {
+            return GestureDetector(
+              onTap: () => setState(() {
+                _currentPromoIndex = entry.key;
+              }),
+              child: Container(
+                width: 8.0,
+                height: 8.0,
+                margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _currentPromoIndex == entry.key
+                      ? const Color(0xFFF26722)
+                      : Colors.grey,
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        const Spacer(), // Ensures proper layout without unnecessary blank space
       ],
     );
   }
