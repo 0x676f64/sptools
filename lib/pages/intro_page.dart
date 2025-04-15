@@ -18,7 +18,7 @@ class IntroPage extends StatelessWidget {
           SizedBox(height: MediaQuery.of(context).size.height * 0.3),
           Center(
             child: SvgPicture.asset(
-              'assets/images/SP_Bold_Outline_White.svg',
+              'assets/images/SP-Tools-USA.svg',
               height: 140,
               width: 140,
             ),
@@ -81,7 +81,7 @@ class IntroPage extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const GuestPage()),
+                      MaterialPageRoute(builder: (context) => GuestPage()),
                     );
                   },
                   child: Text(

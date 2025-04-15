@@ -27,23 +27,15 @@ class SignUpPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Sign up As",
-                  style: GoogleFonts.rubik(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
                   value: selectedRole,
-                  hint: Text(
+                  hint: const Text(
                     "Select Role",
                     style: TextStyle(color: Colors.grey),
                   ),
                   dropdownColor: const Color(0xFF1E1E1E),
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.grey),
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: const Color(0xFF1E1E1E),
@@ -52,7 +44,7 @@ class SignUpPage extends StatelessWidget {
                       borderSide: BorderSide.none,
                     ),
                   ),
-                  items: [
+                  items: const [
                     DropdownMenuItem(
                       value: "Individual User",
                       child: Text("Individual User"),
