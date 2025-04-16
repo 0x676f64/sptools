@@ -4,7 +4,8 @@ import '/pages/products_page.dart';
 import '/pages/wishlist_page.dart';
 import '/pages/orders_page.dart';
 import '/pages/more_page.dart';
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class GuestPage extends StatefulWidget {
   const GuestPage({super.key});
@@ -18,11 +19,15 @@ class GuestPageState extends State<GuestPage> {
   int _cartItemCount = 0;
   int _currentPromoIndex = 0;
   List<String> promoImages = [];
+  List<dynamic> promoItems = [];
+  bool _isLoadingPromoItems = true;
+  String _promoItemsError = '';
 
   @override
   void initState() {
     super.initState();
     _fetchPromoImages();
+    _fetchPromoItems();
   }
 
   Future<void> _fetchPromoImages() async {
@@ -33,14 +38,51 @@ class GuestPageState extends State<GuestPage> {
     });
   }
 
+  Future<void> _fetchPromoItems() async {
+    final url = Uri.parse(
+        'https://www.sptoolsusa.com/api/cacheable/items?c=7071087&commercecategoryurl=%2Fproducts%2Fpromos&country=US&currency=USD&facet.exclude=custitem_ns_sc_ext_only_pdp%2Ccustitem_ns_sc_ext_gift_cert_group_id%2Citemtype&fieldset=search&include=facets&language=en&limit=48&matrixchilditems_fieldset=matrixchilditems_search&n=2&offset=0&pricelevel=5&sort=custitem_ns_sc_ext_ts_365_amount%3Adesc&use_pcv=T');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final decodedData = json.decode(response.body);
+
+        if (decodedData != null && decodedData['items'] != null && decodedData['items'] is List) {
+          setState(() {
+            promoItems = decodedData['items'];
+            _isLoadingPromoItems = false;
+          });
+        } else {
+          setState(() {
+            _promoItemsError = 'API response missing or invalid data. Check API response: ${response.body}';
+            _isLoadingPromoItems = false;
+          });
+        }
+      } else {
+        setState(() {
+          _promoItemsError = 'Failed to load promo items: ${response.statusCode}. Check API response: ${response.body}';
+          _isLoadingPromoItems = false;
+        });
+        print('Failed to load promo items: ${response.statusCode}. Check API response: ${response.body}');
+      }
+    } catch (e) {
+      setState(() {
+        _promoItemsError = 'An error occurred loading promo items: $e. Check error: $e';
+        _isLoadingPromoItems = false;
+      });
+      print('Error fetching promo items: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A),
       body: Column(
         children: [
-          _buildHeader(_getPageName(_selectedIndex)), // Header
-          Expanded(child: _buildContent()), // Content
+          _buildHeader(_getPageName(_selectedIndex)),
+          Expanded(child: _buildContent()),
         ],
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
@@ -117,12 +159,18 @@ class GuestPageState extends State<GuestPage> {
   }
 
   Widget _buildHomePage() {
-    return Column(
-      children: [
-        const SizedBox(height: 40.0),
-        _buildPromoCarousel(),
-        const Spacer(),
-      ],
+    return SingleChildScrollView(
+      child: Padding( // Added padding to the entire homepage
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 40.0),
+            _buildPromoCarousel(),
+            const SizedBox(height: 20.0),
+            _buildPromoItemsGrid(),
+          ],
+        ),
+      ),
     );
   }
 
@@ -166,7 +214,8 @@ class GuestPageState extends State<GuestPage> {
               child: Container(
                 width: 8.0,
                 height: 8.0,
-                margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+                margin: const EdgeInsets.symmetric(
+                    vertical: 10.0, horizontal: 2.0),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: _currentPromoIndex == entry.key
@@ -179,6 +228,69 @@ class GuestPageState extends State<GuestPage> {
         ),
       ],
     );
+  }
+
+  Widget _buildPromoItemsGrid() {
+    if (_isLoadingPromoItems) {
+      return const Center(child: CircularProgressIndicator(color: Colors.white));
+    } else if (_promoItemsError.isNotEmpty) {
+      return Center(child: Text(_promoItemsError, style: const TextStyle(color: Colors.red)));
+    } else if (promoItems.isEmpty) {
+      return const Center(child: Text('No promo items found.', style: TextStyle(color: Colors.white)));
+    } else {
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16, // Increased spacing
+          mainAxisSpacing: 16, // Increased spacing
+          childAspectRatio: 0.7,
+        ),
+        itemCount: promoItems.length,
+        itemBuilder: (context, index) {
+          final item = promoItems[index];
+          if (item != null && item['displayname'] != null && item['pricelevel1_formatted'] != null) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[800],
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              padding: const EdgeInsets.all(12.0), // Increased padding
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item['displayname'],
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6), // Increased spacing
+                  Text(
+                    item['pricelevel1_formatted'],
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  const SizedBox(height: 10), // Increased spacing
+                  Expanded(
+                    child: Center(
+                      child: item['image'] != null
+                          ? Image.network(
+                        item['image']['url'],
+                        fit: BoxFit.contain,
+                      )
+                          : const SizedBox.shrink(),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          } else {
+            return const SizedBox.shrink();
+          }
+        },
+      );
+    }
   }
 
   Widget _buildBottomNavigationBar() {
