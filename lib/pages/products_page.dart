@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '/pages/category_items_page.dart'; // Ensure this import is correct
 
 class ProductsView extends StatefulWidget {
   const ProductsView({super.key});
@@ -22,7 +23,7 @@ class _ProductsViewState extends State<ProductsView> {
 
   Future<void> fetchCategories() async {
     final url = Uri.parse(
-        'https://www.sptoolsusa.com/api/navigation/v1/categorynavitems?bread_crumb_fields=internalid,name,displayinsite&c=7071087&category_fields=internalid,name,description,pagetitle,pageheading,pagebannerurl,addtohead,metakeywords,metadescription,displayinsite,urlfragment,idpath,fullurl,isprimaryurl&country=US&currency=USD&exclude_empty=true&full_url=/products&fullurl=%2Fproducts&language=en&n=2&pcv_all_items=F&side_menu_fields=name,internalid,sequencenumber,urlfragment,displayinsite&site_id=2');
+        'https://www.sptoolsusa.com/api/navigation/v1/categorynavitems?bread_crumb_fields=internalid,name,displayinsite&c=7071087&category_fields=internalid,name,description,pagetitle,pageheading,pagebannerurl,addtohead,metakeywords,metadescription,displayinsite,urlfragment,idpath,fullurl,isprimaryurl&country=US&currency=USD&exclude_empty=true&full_url=/products&fullurl=%2Fproducts&language=en&n=2&pcv_all_items=F&side_menu_fields=name,internalid,sequencenumber,urlfragment,displayinsite&site_id=2&subcategory_fields=name,description,internalid,sequencenumber,urlfragment,thumbnailurl,displayinsite&use_pcv=T&_=1744998375220');
 
     try {
       final response = await http.get(url);
@@ -66,7 +67,7 @@ class _ProductsViewState extends State<ProductsView> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.white))
           : errorMessage.isNotEmpty
-          ? Center(child: Text(errorMessage, style: TextStyle(color: Colors.red)))
+          ? Center(child: Text(errorMessage, style: const TextStyle(color: Colors.red)))
           : Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -75,6 +76,7 @@ class _ProductsViewState extends State<ProductsView> {
             const Text(
               'All Categories',
               style: TextStyle(
+                fontFamily: 'Roboto Condensed',
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -93,10 +95,18 @@ class _ProductsViewState extends State<ProductsView> {
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
                   final category = categories[index];
-                  if (category != null && category['name'] != null) {
+                  if (category != null && category['name'] != null && category['urlfragment'] != null) {
                     return ElevatedButton(
                       onPressed: () {
-                        print('Category selected: ${category['name']}');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CategoryItemsPage(
+                              categoryName: category['name'],
+                              categoryUrlFragment: category['urlfragment'],
+                            ),
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[800],
@@ -105,10 +115,10 @@ class _ProductsViewState extends State<ProductsView> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Center( // Center the text within the button
+                      child: Center(
                         child: Text(
                           category['name'],
-                          textAlign: TextAlign.center, // Ensure text is centered
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     );

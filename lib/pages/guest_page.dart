@@ -77,15 +77,18 @@ class GuestPageState extends State<GuestPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A),
-      body: Column(
-        children: [
-          _buildHeader(_getPageName(_selectedIndex)),
-          Expanded(child: _buildContent()),
-        ],
+    return DefaultTextStyle( // Wrap the entire app or a significant part
+      style: const TextStyle(fontFamily: 'Roboto Condensed'),
+      child: Scaffold(
+        backgroundColor: const Color(0xFF0A0A0A),
+        body: Column(
+          children: [
+            _buildHeader(_getPageName(_selectedIndex)),
+            Expanded(child: _buildContent()),
+          ],
+        ),
+        bottomNavigationBar: _buildBottomNavigationBar(),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
@@ -101,6 +104,7 @@ class GuestPageState extends State<GuestPage> {
               color: Colors.grey,
               fontSize: 18,
               fontWeight: FontWeight.w400,
+              fontFamily: 'Roboto Condensed',
             ),
           ),
           Stack(
@@ -129,6 +133,7 @@ class GuestPageState extends State<GuestPage> {
                       color: Colors.white,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'Roboto Condensed',
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -243,9 +248,9 @@ class GuestPageState extends State<GuestPage> {
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          crossAxisSpacing: 16, // Increased spacing
-          mainAxisSpacing: 16, // Increased spacing
-          childAspectRatio: 0.7,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 0.7, // Increased further
         ),
         itemCount: promoItems.length,
         itemBuilder: (context, index) {
@@ -253,33 +258,93 @@ class GuestPageState extends State<GuestPage> {
           if (item != null && item['displayname'] != null && item['pricelevel1_formatted'] != null) {
             return Container(
               decoration: BoxDecoration(
-                color: Colors.grey[800],
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(10.0),
               ),
-              padding: const EdgeInsets.all(12.0), // Increased padding
+              padding: const EdgeInsets.all(15.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch, // Make children take full width
+                mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space out children vertically
                 children: [
+                  SizedBox(
+                    height: 120.0,
+                    child: Center(
+                      child: item['itemimages_detail'] != null &&
+                          item['itemimages_detail']['urls'] != null &&
+                          item['itemimages_detail']['urls'].isNotEmpty &&
+                          item['itemimages_detail']['urls'][0]['url'] != null
+                          ? Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Image.network(
+                          item['itemimages_detail']['urls'][0]['url'],
+                          fit: BoxFit.contain,
+                        ),
+                      )
+                          : const SizedBox.shrink(),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   Text(
                     item['displayname'],
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      fontFamily: 'Roboto Condensed',
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6), // Increased spacing
-                  Text(
-                    item['pricelevel1_formatted'],
-                    style: const TextStyle(color: Colors.white),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        item['pricelevel1_formatted'],
+                        style: const TextStyle(
+                          color: Color(0xFFF26722),
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Roboto Condensed',
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          // Handle adding to favorites/wishlist
+                          print('Added to Favorites: ${item['displayname']}');
+                        },
+                        child: const Icon(
+                          Icons.favorite_border,
+                          color: Color(0xFFF26722),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 10), // Increased spacing
-                  Expanded(
-                    child: Center(
-                      child: item['image'] != null
-                          ? Image.network(
-                        item['image']['url'],
-                        fit: BoxFit.contain,
-                      )
-                          : const SizedBox.shrink(),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: item['isinstock'] == true
+                        ? ElevatedButton(
+                      onPressed: () {
+                        // Handle adding to cart
+                        print('Add to Cart: ${item['displayname']}');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFF26722),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        textStyle: const TextStyle(fontSize: 12),
+                      ),
+                      child: const Text('Add to Cart'),
+                    )
+                        : ElevatedButton(
+                      onPressed: null,
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all<Color>(Colors.grey[600]!),
+                        foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
+                      ),
+                      child: const Text('Out of Stock'),
                     ),
                   ),
                 ],
