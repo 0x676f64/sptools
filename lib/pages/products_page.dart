@@ -4,7 +4,14 @@ import 'package:http/http.dart' as http;
 import '/pages/category_items_page.dart'; // Ensure this import is correct
 
 class ProductsView extends StatefulWidget {
-  const ProductsView({super.key});
+  final Function(String) toggleWishlistItem;
+  final Function(String) isItemInWishlist;
+
+  const ProductsView({
+    super.key,
+    required this.toggleWishlistItem,
+    required this.isItemInWishlist,
+  });
 
   @override
   _ProductsViewState createState() => _ProductsViewState();
@@ -67,7 +74,7 @@ class _ProductsViewState extends State<ProductsView> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.white))
           : errorMessage.isNotEmpty
-          ? Center(child: Text(errorMessage, style: const TextStyle(color: Colors.red)))
+          ? Center(child: Text(errorMessage, style: const TextStyle(color: Colors.red, fontFamily: 'Roboto Condensed')))
           : Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -104,6 +111,8 @@ class _ProductsViewState extends State<ProductsView> {
                             builder: (context) => CategoryItemsPage(
                               categoryName: category['name'],
                               categoryUrlFragment: category['urlfragment'],
+                              toggleWishlistItem: widget.toggleWishlistItem,
+                              isItemInWishlist: widget.isItemInWishlist,
                             ),
                           ),
                         );
@@ -119,6 +128,7 @@ class _ProductsViewState extends State<ProductsView> {
                         child: Text(
                           category['name'],
                           textAlign: TextAlign.center,
+                          style: const TextStyle(fontFamily: 'Roboto Condensed'),
                         ),
                       ),
                     );

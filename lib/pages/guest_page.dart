@@ -15,13 +15,30 @@ class GuestPage extends StatefulWidget {
 }
 
 class GuestPageState extends State<GuestPage> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 0; // Changed back to Home
   int _cartItemCount = 0;
   int _currentPromoIndex = 0;
   List<String> promoImages = [];
   List<dynamic> promoItems = [];
   bool _isLoadingPromoItems = true;
   String _promoItemsError = '';
+  Set<String> _wishlistItems = <String>{}; // Set to store wishlisted item IDs
+
+  void _toggleWishlistItem(String itemId) {
+    setState(() {
+      if (_wishlistItems.contains(itemId)) {
+        _wishlistItems.remove(itemId);
+        print('Removed $itemId from wishlist');
+      } else {
+        _wishlistItems.add(itemId);
+        print('Added $itemId to wishlist');
+      }
+    });
+  }
+
+  bool isItemInWishlist(String itemId) {
+    return _wishlistItems.contains(itemId);
+  }
 
   @override
   void initState() {
@@ -77,7 +94,7 @@ class GuestPageState extends State<GuestPage> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTextStyle( // Wrap the entire app or a significant part
+    return DefaultTextStyle(
       style: const TextStyle(fontFamily: 'Roboto Condensed'),
       child: Scaffold(
         backgroundColor: const Color(0xFF0A0A0A),
@@ -107,39 +124,46 @@ class GuestPageState extends State<GuestPage> {
               fontFamily: 'Roboto Condensed',
             ),
           ),
-          Stack(
-            children: [
-              const Icon(
-                Icons.shopping_cart,
-                color: Colors.grey,
-                size: 30,
-              ),
-              Positioned(
-                right: 0,
-                top: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(1.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 16,
-                    minHeight: 16,
-                  ),
-                  child: Text(
-                    '$_cartItemCount',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Roboto Condensed',
+          GestureDetector( // Wrap the Stack with GestureDetector
+            onTap: () {
+              setState(() {
+                _selectedIndex = 3; // Set the selected index to the Orders page
+              });
+            },
+            child: Stack(
+              children: [
+                const Icon(
+                  Icons.shopping_cart,
+                  color: Colors.grey,
+                  size: 30,
+                ),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(1.0),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
                     ),
-                    textAlign: TextAlign.center,
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      '$_cartItemCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Roboto Condensed',
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -151,9 +175,20 @@ class GuestPageState extends State<GuestPage> {
       case 0:
         return _buildHomePage();
       case 1:
-        return const ProductsView();
+        return ProductsView(
+          toggleWishlistItem: _toggleWishlistItem,
+          isItemInWishlist: isItemInWishlist,
+        );
       case 2:
-        return const WishlistView();
+        return WishlistView(
+          wishlistItems: _wishlistItems,
+          onRemoveFromWishlist: (itemId) {
+            setState(() {
+              _wishlistItems.remove(itemId);
+              print('Removed $itemId from wishlist');
+            });
+          },
+        );
       case 3:
         return const OrdersView();
       case 4:
@@ -239,9 +274,9 @@ class GuestPageState extends State<GuestPage> {
     if (_isLoadingPromoItems) {
       return const Center(child: CircularProgressIndicator(color: Colors.white));
     } else if (_promoItemsError.isNotEmpty) {
-      return Center(child: Text(_promoItemsError, style: const TextStyle(color: Colors.red)));
+      return Center(child: Text(_promoItemsError, style: const TextStyle(color: Colors.red, fontFamily: 'Roboto Condensed')));
     } else if (promoItems.isEmpty) {
-      return const Center(child: Text('No promo items found.', style: TextStyle(color: Colors.white)));
+      return const Center(child: Text('No promo items found.', style: TextStyle(color: Colors.white, fontFamily: 'Roboto Condensed')));
     } else {
       return GridView.builder(
         shrinkWrap: true,
@@ -255,7 +290,7 @@ class GuestPageState extends State<GuestPage> {
         itemCount: promoItems.length,
         itemBuilder: (context, index) {
           final item = promoItems[index];
-          if (item != null && item['displayname'] != null && item['pricelevel1_formatted'] != null) {
+          if (item != null && item['itemid'] != null && item['displayname'] != null && item['pricelevel1_formatted'] != null) {
             return Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -311,11 +346,12 @@ class GuestPageState extends State<GuestPage> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          // Handle adding to favorites/wishlist
-                          print('Added to Favorites: ${item['displayname']}');
+                          _toggleWishlistItem(item['itemid'].toString());
                         },
-                        child: const Icon(
-                          Icons.favorite_border,
+                        child: Icon(
+                          isItemInWishlist(item['itemid'].toString())
+                              ? Icons.favorite
+                              : Icons.favorite_border,
                           color: Color(0xFFF26722),
                         ),
                       ),
@@ -334,17 +370,17 @@ class GuestPageState extends State<GuestPage> {
                         backgroundColor: const Color(0xFFF26722),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 8),
-                        textStyle: const TextStyle(fontSize: 12),
+                        textStyle: const TextStyle(fontSize: 12, fontFamily: 'Roboto Condensed'),
                       ),
-                      child: const Text('Add to Cart'),
+                      child: const Text('Add to Cart', style: TextStyle(fontFamily: 'Roboto Condensed')),
                     )
                         : ElevatedButton(
                       onPressed: null,
                       style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all<Color>(Colors.grey[600]!),
-                        foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
+                        backgroundColor: MaterialStateProperty.all<Color>(Colors.grey[600]!),
+                        foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
                       ),
-                      child: const Text('Out of Stock'),
+                      child: const Text('Out of Stock', style: TextStyle(fontFamily: 'Roboto Condensed')),
                     ),
                   ),
                 ],
@@ -394,6 +430,7 @@ class GuestPageState extends State<GuestPage> {
             style: TextStyle(
               color: _selectedIndex == index ? const Color(0xFFF26722) : Colors.grey,
               fontSize: 14,
+              fontFamily: 'Roboto Condensed',
             ),
           ),
         ],

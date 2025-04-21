@@ -5,12 +5,15 @@ import 'package:http/http.dart' as http;
 class CategoryItemsPage extends StatefulWidget {
   final String categoryName;
   final String categoryUrlFragment;
-
+  final Function(String) toggleWishlistItem;
+  final Function(String) isItemInWishlist;
 
   const CategoryItemsPage({
     super.key,
     required this.categoryName,
     required this.categoryUrlFragment,
+    required this.toggleWishlistItem,
+    required this.isItemInWishlist,
   });
 
   @override
@@ -80,12 +83,12 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
           crossAxisCount: 2,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
-          childAspectRatio: 0.65, // Increased childAspectRatio to make boxes longer
+          childAspectRatio: 0.65,
         ),
         itemCount: categoryItems.length,
         itemBuilder: (context, index) {
           final item = categoryItems[index];
-          if (item != null && item['displayname'] != null && item['pricelevel1_formatted'] != null) {
+          if (item != null && item['itemid'] != null && item['displayname'] != null && item['pricelevel1_formatted'] != null) {
             return Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -141,12 +144,14 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          // Handle adding to favorites/wishlist
-                          print('Added to Favorites: ${item['displayname']}');
+                          widget.toggleWishlistItem(item['itemid'].toString());
+                          setState(() {});
                         },
-                        child: const Icon(
-                          Icons.favorite_border,
-                          color: Color(0xFFF26722),
+                        child: Icon(
+                          widget.isItemInWishlist(item['itemid'].toString())
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: const Color(0xFFF26722),
                         ),
                       ),
                     ],
@@ -171,8 +176,8 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
                         : ElevatedButton(
                       onPressed: null,
                       style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all<Color>(Colors.grey[600]!),
-                        foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
+                        backgroundColor: MaterialStateProperty.all<Color>(Colors.grey[800]!),
+                        foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
                       ),
                       child: const Text('Out of Stock', style: TextStyle(fontFamily: 'Roboto Condensed')),
                     ),
