@@ -7,6 +7,7 @@ class CategoryItemsPage extends StatefulWidget {
   final String categoryUrlFragment;
   final Function(String) toggleWishlistItem;
   final Function(String) isItemInWishlist;
+  final Function(Map<String, dynamic>) onAddToCart; // Add this parameter
 
   const CategoryItemsPage({
     super.key,
@@ -14,6 +15,7 @@ class CategoryItemsPage extends StatefulWidget {
     required this.categoryUrlFragment,
     required this.toggleWishlistItem,
     required this.isItemInWishlist,
+    required this.onAddToCart, // Add this parameter in the constructor as well
   });
 
   @override
@@ -162,8 +164,7 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
                     child: item['isinstock'] == true
                         ? ElevatedButton(
                       onPressed: () {
-                        // Handle adding to cart
-                        print('Add to Cart: ${item['displayname']}');
+                        widget.onAddToCart(item); // Use the passed callback
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange[700],
@@ -200,7 +201,7 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Colors.white, // Change this color if needed
+          color: Colors.white,
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -211,7 +212,7 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
             children: [
               const Icon(
                 Icons.shopping_cart,
-                color: Colors.white, // You can change the cart icon color here
+                color: Colors.white,
                 size: 30,
               ),
               Positioned(
@@ -228,7 +229,7 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
                     minHeight: 16,
                   ),
                   child: Text(
-                    '$_cartItemCount', // Use the cart item count
+                    '$_cartItemCount',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
@@ -241,18 +242,18 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
               ),
             ],
           ),
-          const SizedBox(width: 16), // Add some spacing to the right
+          const SizedBox(width: 16),
         ],
         backgroundColor: Colors.grey[900],
       ),
-      body: SingleChildScrollView( // Wrap the entire body in SingleChildScrollView
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.categoryName, // Display category name above the grid
+                widget.categoryName,
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -262,7 +263,7 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
               ),
               const SizedBox(height: 16),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center, // Center the buttons horizontally
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
                     onPressed: () {

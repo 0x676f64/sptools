@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '/pages/category_items_page.dart'; // Ensure this import is correct
+import '/pages/category_items_page.dart';
 
 class ProductsView extends StatefulWidget {
   final Function(String) toggleWishlistItem;
   final Function(String) isItemInWishlist;
+  final Function(Map<String, dynamic>) onAddToCart; // Add this
 
   const ProductsView({
     super.key,
     required this.toggleWishlistItem,
     required this.isItemInWishlist,
+    required this.onAddToCart, // Add this
   });
 
   @override
@@ -113,6 +115,7 @@ class _ProductsViewState extends State<ProductsView> {
                               categoryUrlFragment: category['urlfragment'],
                               toggleWishlistItem: widget.toggleWishlistItem,
                               isItemInWishlist: widget.isItemInWishlist,
+                              onAddToCart: widget.onAddToCart, // Pass onAddToCart
                             ),
                           ),
                         );

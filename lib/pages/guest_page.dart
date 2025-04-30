@@ -1,3 +1,4 @@
+// guest_page.dart
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '/pages/products_page.dart';
@@ -15,14 +16,15 @@ class GuestPage extends StatefulWidget {
 }
 
 class GuestPageState extends State<GuestPage> {
-  int _selectedIndex = 0; // Changed back to Home
-  int _cartItemCount = 0;
+  int _selectedIndex = 0;
+  Set<String> _wishlistItems = <String>{};
+  List<Map<String, dynamic>> _cartItems = <Map<String, dynamic>>[]; // Our cart
+  int get _cartItemCount => _cartItems.length; // Cart item count
   int _currentPromoIndex = 0;
   List<String> promoImages = [];
   List<dynamic> promoItems = [];
   bool _isLoadingPromoItems = true;
   String _promoItemsError = '';
-  Set<String> _wishlistItems = <String>{}; // Set to store wishlisted item IDs
 
   void _toggleWishlistItem(String itemId) {
     setState(() {
@@ -38,6 +40,22 @@ class GuestPageState extends State<GuestPage> {
 
   bool isItemInWishlist(String itemId) {
     return _wishlistItems.contains(itemId);
+  }
+
+  void _addToCart(Map<String, dynamic> product) {
+    setState(() {
+      _cartItems.add(product);
+      print('Added ${product['displayname']} to cart. Cart count: $_cartItemCount');
+    });
+  }
+
+  void _removeFromCart(int index) {
+    setState(() {
+      if (index >= 0 && index < _cartItems.length) {
+        _cartItems.removeAt(index);
+        print('Removed item at index $index from cart. Cart count: $_cartItemCount');
+      }
+    });
   }
 
   @override
@@ -124,10 +142,10 @@ class GuestPageState extends State<GuestPage> {
               fontFamily: 'Roboto Condensed',
             ),
           ),
-          GestureDetector( // Wrap the Stack with GestureDetector
+          GestureDetector(
             onTap: () {
               setState(() {
-                _selectedIndex = 3; // Set the selected index to the Orders page
+                _selectedIndex = 3; // Navigate to Orders page
               });
             },
             child: Stack(
@@ -151,7 +169,7 @@ class GuestPageState extends State<GuestPage> {
                       minHeight: 16,
                     ),
                     child: Text(
-                      '$_cartItemCount',
+                      '$_cartItemCount', // Display cart item count
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12,
@@ -173,11 +191,12 @@ class GuestPageState extends State<GuestPage> {
   Widget _buildContent() {
     switch (_selectedIndex) {
       case 0:
-        return _buildHomePage();
+        return _buildHomePage(onAddToCart: _addToCart); // Pass _addToCart
       case 1:
         return ProductsView(
           toggleWishlistItem: _toggleWishlistItem,
           isItemInWishlist: isItemInWishlist,
+          onAddToCart: _addToCart, // Pass _addToCart
         );
       case 2:
         return WishlistView(
@@ -190,7 +209,7 @@ class GuestPageState extends State<GuestPage> {
           },
         );
       case 3:
-        return const OrdersView();
+        return OrdersView(cartItems: _cartItems, onRemoveFromCart: _removeFromCart); // Pass cart items and remove function
       case 4:
         return const MoreView();
       default:
@@ -198,18 +217,16 @@ class GuestPageState extends State<GuestPage> {
     }
   }
 
-  Widget _buildHomePage() {
+  Widget _buildHomePage({required Function(Map<String, dynamic>) onAddToCart}) {
     return SingleChildScrollView(
-      child: Padding( // Added padding to the entire homepage
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 40.0),
-            _buildPromoCarousel(),
-            const SizedBox(height: 20.0),
-            _buildPromoItemsGrid(),
-          ],
-        ),
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          const SizedBox(height: 40.0),
+          _buildPromoCarousel(),
+          const SizedBox(height: 20.0),
+          _buildPromoItemsGrid(onAddToCart: onAddToCart), // Pass onAddToCart
+        ],
       ),
     );
   }
@@ -270,7 +287,7 @@ class GuestPageState extends State<GuestPage> {
     );
   }
 
-  Widget _buildPromoItemsGrid() {
+  Widget _buildPromoItemsGrid({required Function(Map<String, dynamic>) onAddToCart}) {
     if (_isLoadingPromoItems) {
       return const Center(child: CircularProgressIndicator(color: Colors.white));
     } else if (_promoItemsError.isNotEmpty) {
@@ -285,7 +302,7 @@ class GuestPageState extends State<GuestPage> {
           crossAxisCount: 2,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
-          childAspectRatio: 0.7, // Increased further
+          childAspectRatio: 0.7,
         ),
         itemCount: promoItems.length,
         itemBuilder: (context, index) {
@@ -298,8 +315,8 @@ class GuestPageState extends State<GuestPage> {
               ),
               padding: const EdgeInsets.all(15.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch, // Make children take full width
-                mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space out children vertically
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   SizedBox(
                     height: 120.0,
@@ -352,7 +369,7 @@ class GuestPageState extends State<GuestPage> {
                           isItemInWishlist(item['itemid'].toString())
                               ? Icons.favorite
                               : Icons.favorite_border,
-                          color: Color(0xFFF26722),
+                          color: const Color(0xFFF26722),
                         ),
                       ),
                     ],
@@ -363,8 +380,7 @@ class GuestPageState extends State<GuestPage> {
                     child: item['isinstock'] == true
                         ? ElevatedButton(
                       onPressed: () {
-                        // Handle adding to cart
-                        print('Add to Cart: ${item['displayname']}');
+                        onAddToCart(item); // Call the passed addToCart function
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFF26722),
@@ -414,28 +430,28 @@ class GuestPageState extends State<GuestPage> {
 
   BottomNavigationBarItem _buildNavBarItem(String icon, String label, int index, double size) {
     return BottomNavigationBarItem(
-      icon: Column(
+        icon: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Image.asset(
-            'assets/images/$icon',
-            height: size,
-            width: size,
-            color: _selectedIndex == index ? const Color(0xFFF26722) : Colors.grey,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: TextStyle(
-              color: _selectedIndex == index ? const Color(0xFFF26722) : Colors.grey,
-              fontSize: 14,
-              fontFamily: 'Roboto Condensed',
-            ),
-          ),
+        Image.asset(
+        'assets/images/$icon',
+        height: size,
+        width: size,
+        color: _selectedIndex == index ? const Color(0xFFF26722) : Colors.grey,
+    ),
+    const SizedBox(height: 2),
+    Text(
+    label,
+    style: TextStyle(
+    color: _selectedIndex == index ? const Color(0xFFF26722) : Colors.grey,
+    fontSize: 14,
+      fontFamily: 'Roboto Condensed',
+    ),
+    ),
         ],
-      ),
-      label: '',
+        ),
+      label: '', // Hide the label in the BottomNavigationBar itself
     );
   }
 
@@ -446,6 +462,19 @@ class GuestPageState extends State<GuestPage> {
   }
 
   String _getPageName(int index) {
-    return ['SP Tools Home', 'Products', 'Wishlist', 'Orders', 'More'][index];
+    switch (index) {
+      case 0:
+        return 'Home';
+      case 1:
+        return 'Products';
+      case 2:
+        return 'Wishlist';
+      case 3:
+        return 'Orders';
+      case 4:
+        return 'More';
+      default:
+        return '';
+    }
   }
 }
