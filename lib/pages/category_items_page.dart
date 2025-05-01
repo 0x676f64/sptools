@@ -7,7 +7,9 @@ class CategoryItemsPage extends StatefulWidget {
   final String categoryUrlFragment;
   final Function(String) toggleWishlistItem;
   final Function(String) isItemInWishlist;
-  final Function(Map<String, dynamic>) onAddToCart; // Add this parameter
+  final Function(Map<String, dynamic>) onAddToCart;
+  final int cartItemCount; // Add this to receive the current cart count
+  final Function() onCartTap; // Add this to handle cart icon tap
 
   const CategoryItemsPage({
     super.key,
@@ -15,7 +17,9 @@ class CategoryItemsPage extends StatefulWidget {
     required this.categoryUrlFragment,
     required this.toggleWishlistItem,
     required this.isItemInWishlist,
-    required this.onAddToCart, // Add this parameter in the constructor as well
+    required this.onAddToCart,
+    required this.cartItemCount, // Add this parameter to constructor
+    required this.onCartTap, // Add this parameter to constructor
   });
 
   @override
@@ -26,11 +30,12 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
   List<dynamic> categoryItems = [];
   bool _isLoadingCategoryItems = true;
   String _categoryItemsError = '';
-  int _cartItemCount = 0;
+  late int _cartItemCount; // Change to late and use widget's value
 
   @override
   void initState() {
     super.initState();
+    _cartItemCount = widget.cartItemCount; // Initialize from widget parameter
     _fetchCategoryItems();
   }
 
@@ -164,7 +169,11 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
                     child: item['isinstock'] == true
                         ? ElevatedButton(
                       onPressed: () {
-                        widget.onAddToCart(item); // Use the passed callback
+                        widget.onAddToCart(item);
+                        // Update local cart count when adding an item
+                        setState(() {
+                          _cartItemCount++;
+                        });
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange[700],
@@ -177,8 +186,8 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
                         : ElevatedButton(
                       onPressed: null,
                       style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(Colors.grey[800]!),
-                        foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                        backgroundColor: WidgetStateProperty.all<Color>(Colors.grey[800]!),
+                        foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
                       ),
                       child: const Text('Out of Stock', style: TextStyle(fontFamily: 'Roboto Condensed')),
                     ),
@@ -208,39 +217,42 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
         ),
         title: const Text(''),
         actions: [
-          Stack(
-            children: [
-              const Icon(
-                Icons.shopping_cart,
-                color: Colors.white,
-                size: 30,
-              ),
-              Positioned(
-                right: 0,
-                top: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(1.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 16,
-                    minHeight: 16,
-                  ),
-                  child: Text(
-                    '$_cartItemCount',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Roboto Condensed',
+          GestureDetector(
+            onTap: widget.onCartTap, // Use the passed callback to handle cart tap
+            child: Stack(
+              children: [
+                const Icon(
+                  Icons.shopping_cart,
+                  color: Colors.white,
+                  size: 30,
+                ),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(1.0),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
                     ),
-                    textAlign: TextAlign.center,
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      '$_cartItemCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Roboto Condensed',
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(width: 16),
         ],

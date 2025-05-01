@@ -1,4 +1,3 @@
-// guest_page.dart
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '/pages/products_page.dart';
@@ -55,6 +54,13 @@ class GuestPageState extends State<GuestPage> {
         _cartItems.removeAt(index);
         print('Removed item at index $index from cart. Cart count: $_cartItemCount');
       }
+    });
+  }
+
+  // Add a method to navigate directly to orders page
+  void _navigateToOrders() {
+    setState(() {
+      _selectedIndex = 3; // Navigate to Orders page
     });
   }
 
@@ -143,11 +149,7 @@ class GuestPageState extends State<GuestPage> {
             ),
           ),
           GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedIndex = 3; // Navigate to Orders page
-              });
-            },
+            onTap: _navigateToOrders, // Use the dedicated navigation method
             child: Stack(
               children: [
                 const Icon(
@@ -191,12 +193,14 @@ class GuestPageState extends State<GuestPage> {
   Widget _buildContent() {
     switch (_selectedIndex) {
       case 0:
-        return _buildHomePage(onAddToCart: _addToCart); // Pass _addToCart
+        return _buildHomePage(onAddToCart: _addToCart);
       case 1:
         return ProductsView(
           toggleWishlistItem: _toggleWishlistItem,
           isItemInWishlist: isItemInWishlist,
-          onAddToCart: _addToCart, // Pass _addToCart
+          onAddToCart: _addToCart,
+          cartItemCount: _cartItemCount, // Pass the current cart count
+          navigateToOrders: _navigateToOrders, // Pass the navigation function
         );
       case 2:
         return WishlistView(
@@ -209,7 +213,7 @@ class GuestPageState extends State<GuestPage> {
           },
         );
       case 3:
-        return OrdersView(cartItems: _cartItems, onRemoveFromCart: _removeFromCart); // Pass cart items and remove function
+        return OrdersView(cartItems: _cartItems, onRemoveFromCart: _removeFromCart);
       case 4:
         return const MoreView();
       default:
@@ -225,7 +229,7 @@ class GuestPageState extends State<GuestPage> {
           const SizedBox(height: 40.0),
           _buildPromoCarousel(),
           const SizedBox(height: 20.0),
-          _buildPromoItemsGrid(onAddToCart: onAddToCart), // Pass onAddToCart
+          _buildPromoItemsGrid(onAddToCart: onAddToCart),
         ],
       ),
     );
@@ -430,27 +434,27 @@ class GuestPageState extends State<GuestPage> {
 
   BottomNavigationBarItem _buildNavBarItem(String icon, String label, int index, double size) {
     return BottomNavigationBarItem(
-        icon: Column(
+      icon: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-        Image.asset(
-        'assets/images/$icon',
-        height: size,
-        width: size,
-        color: _selectedIndex == index ? const Color(0xFFF26722) : Colors.grey,
-    ),
-    const SizedBox(height: 2),
-    Text(
-    label,
-    style: TextStyle(
-    color: _selectedIndex == index ? const Color(0xFFF26722) : Colors.grey,
-    fontSize: 14,
-      fontFamily: 'Roboto Condensed',
-    ),
-    ),
+          Image.asset(
+            'assets/images/$icon',
+            height: size,
+            width: size,
+            color: _selectedIndex == index ? const Color(0xFFF26722) : Colors.grey,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              color: _selectedIndex == index ? const Color(0xFFF26722) : Colors.grey,
+              fontSize: 14,
+              fontFamily: 'Roboto Condensed',
+            ),
+          ),
         ],
-        ),
+      ),
       label: '', // Hide the label in the BottomNavigationBar itself
     );
   }

@@ -6,13 +6,17 @@ import '/pages/category_items_page.dart';
 class ProductsView extends StatefulWidget {
   final Function(String) toggleWishlistItem;
   final Function(String) isItemInWishlist;
-  final Function(Map<String, dynamic>) onAddToCart; // Add this
+  final Function(Map<String, dynamic>) onAddToCart;
+  final int cartItemCount; // Add this to receive the current cart count
+  final Function() navigateToOrders; // Add this to navigate to Orders page
 
   const ProductsView({
     super.key,
     required this.toggleWishlistItem,
     required this.isItemInWishlist,
-    required this.onAddToCart, // Add this
+    required this.onAddToCart,
+    required this.cartItemCount, // Add this parameter to constructor
+    required this.navigateToOrders, // Add this parameter to constructor
   });
 
   @override
@@ -115,7 +119,9 @@ class _ProductsViewState extends State<ProductsView> {
                               categoryUrlFragment: category['urlfragment'],
                               toggleWishlistItem: widget.toggleWishlistItem,
                               isItemInWishlist: widget.isItemInWishlist,
-                              onAddToCart: widget.onAddToCart, // Pass onAddToCart
+                              onAddToCart: widget.onAddToCart,
+                              cartItemCount: widget.cartItemCount, // Pass current cart count
+                              onCartTap: widget.navigateToOrders, // Pass the navigation function
                             ),
                           ),
                         );
