@@ -9,7 +9,7 @@ class CategoryItemsPage extends StatefulWidget {
   final Function(String) isItemInWishlist;
   final Function(Map<String, dynamic>) onAddToCart;
   final int cartItemCount; // Add this to receive the current cart count
-  final Function() onCartTap; // Add this to handle cart icon tap
+  final VoidCallback onCartTap; // Use VoidCallback for simple callbacks
 
   const CategoryItemsPage({
     super.key,
@@ -186,8 +186,8 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
                         : ElevatedButton(
                       onPressed: null,
                       style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all<Color>(Colors.grey[800]!),
-                        foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
+                        backgroundColor: MaterialStateProperty.all<Color>(Colors.grey[800]!),
+                        foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
                       ),
                       child: const Text('Out of Stock', style: TextStyle(fontFamily: 'Roboto Condensed')),
                     ),
