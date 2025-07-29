@@ -2,29 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class SignUpPage extends StatelessWidget {
+class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
   @override
+  State<SignUpPage> createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
+  String? selectedRole;
+
+  @override
   Widget build(BuildContext context) {
-    String? selectedRole;
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(height: MediaQuery.of(context).size.height * 0.0),
-          Center(
-            child: SvgPicture.asset(
-              'assets/images/SP-Tools-USA.svg',
-              height: 140,
-              width: 140,
+      resizeToAvoidBottomInset: true, // This ensures the scaffold resizes when keyboard appears
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+            Center(
+              child: SvgPicture.asset(
+                'assets/images/SP-Tools-USA.svg',
+                height: 140,
+                width: 140,
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
+            const SizedBox(height: 20),
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
@@ -55,9 +62,9 @@ class SignUpPage extends StatelessWidget {
                     ),
                   ],
                   onChanged: (value) {
-                    if (value != null) {
+                    setState(() {
                       selectedRole = value;
-                    }
+                    });
                   },
                 ),
                 const SizedBox(height: 15),
@@ -203,10 +210,11 @@ class SignUpPage extends StatelessWidget {
                     ),
                   ],
                 ),
+                const SizedBox(height: 20), // Extra bottom padding
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

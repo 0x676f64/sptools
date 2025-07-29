@@ -186,8 +186,8 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
                         : ElevatedButton(
                       onPressed: null,
                       style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(Colors.grey[800]!),
-                        foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                        backgroundColor: WidgetStateProperty.all<Color>(Colors.grey[800]!),
+                        foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
                       ),
                       child: const Text('Out of Stock', style: TextStyle(fontFamily: 'Roboto Condensed')),
                     ),

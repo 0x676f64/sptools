@@ -81,7 +81,7 @@ class IntroPage extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => GuestPage()),
+                      MaterialPageRoute(builder: (context) => const GuestPage()),
                     );
                   },
                   child: Text(

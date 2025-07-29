@@ -121,7 +121,11 @@ class _ProductsViewState extends State<ProductsView> {
                               isItemInWishlist: widget.isItemInWishlist,
                               onAddToCart: widget.onAddToCart,
                               cartItemCount: widget.cartItemCount, // Pass current cart count
-                              onCartTap: widget.navigateToOrders, // Pass the navigation function
+                              onCartTap: () {
+                                print('Cart icon tapped from CategoryItemsPage!');
+                                Navigator.pop(context); // Go back to parent first
+                                widget.navigateToOrders(); // Then navigate to orders
+                              },// Pass the navigation function
                             ),
                           ),
                         );

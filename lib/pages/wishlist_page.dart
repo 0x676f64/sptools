@@ -6,8 +6,14 @@ import 'package:http/http.dart' as http;
 class WishlistView extends StatefulWidget {
   final Set<String> wishlistItems;
   final Function(String) onRemoveFromWishlist; // Callback to remove items
+  final VoidCallback? onBackPressed; // Optional callback for back button
 
-  const WishlistView({super.key, required this.wishlistItems, required this.onRemoveFromWishlist});
+  const WishlistView({
+    super.key,
+    required this.wishlistItems,
+    required this.onRemoveFromWishlist,
+    this.onBackPressed, // Add this optional parameter
+  });
 
   @override
   State<WishlistView> createState() => _WishlistViewState();
@@ -23,8 +29,7 @@ class _WishlistViewState extends State<WishlistView> {
         final decodedData = json.decode(response.body);
         return decodedData['item'];
       } else {
-        print('Failed to load product details for $itemId: ${response
-            .statusCode}');
+        print('Failed to load product details for $itemId: ${response.statusCode}');
         return {};
       }
     } catch (e) {
@@ -35,15 +40,34 @@ class _WishlistViewState extends State<WishlistView> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.wishlistItems.isEmpty) {
-      return const Center(
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: Colors.white,
+          onPressed: widget.onBackPressed ?? () {
+            // Default behavior: navigate to home tab (index 0)
+            // You'll need to pass a proper callback from parent
+          },
+        ),
+        title: const Text(
+          'My Wishlist',
+          style: TextStyle(
+            color: Colors.white,
+            fontFamily: 'Roboto Condensed',
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+      ),
+      body: widget.wishlistItems.isEmpty
+          ? const Center(
         child: Text(
           'Your Wishlist is Empty',
           style: TextStyle(color: Colors.white, fontFamily: 'Roboto Condensed'),
         ),
-      );
-    } else {
-      return ListView.builder(
+      )
+          : ListView.builder(
         itemCount: widget.wishlistItems.length,
         itemBuilder: (context, index) {
           final itemId = widget.wishlistItems.elementAt(index);
@@ -74,14 +98,11 @@ class _WishlistViewState extends State<WishlistView> {
                 final product = snapshot.data!;
                 return Card(
                   color: Colors.white,
-                  // Match category item box color
                   margin: const EdgeInsets.all(8.0),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0)),
-                  // Match category item box shape
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
-                    // Match category item box padding
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -141,9 +162,6 @@ class _WishlistViewState extends State<WishlistView> {
                           ],
                         ),
                         const SizedBox(height: 8),
-                        // You might not need the "Add to Cart" button here,
-                        // but if you do, you can add it similarly to the
-                        // CategoryItemsPage.
                       ],
                     ),
                   ),
@@ -152,7 +170,7 @@ class _WishlistViewState extends State<WishlistView> {
             },
           );
         },
-      );
-    }
+      ),
+    );
   }
 }

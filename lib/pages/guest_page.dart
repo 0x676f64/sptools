@@ -16,8 +16,8 @@ class GuestPage extends StatefulWidget {
 
 class GuestPageState extends State<GuestPage> {
   int _selectedIndex = 0;
-  Set<String> _wishlistItems = <String>{};
-  List<Map<String, dynamic>> _cartItems = <Map<String, dynamic>>[]; // Our cart
+  final Set<String> _wishlistItems = <String>{};
+  final List<Map<String, dynamic>> _cartItems = <Map<String, dynamic>>[]; // Our cart
   int get _cartItemCount => _cartItems.length; // Cart item count
   int _currentPromoIndex = 0;
   List<String> promoImages = [];
@@ -211,6 +211,11 @@ class GuestPageState extends State<GuestPage> {
               print('Removed $itemId from wishlist');
             });
           },
+          onBackPressed: () {
+            setState(() {
+              _selectedIndex = 0; // Navigate back to home tab
+            });
+          },
         );
       case 3:
         return OrdersView(cartItems: _cartItems, onRemoveFromCart: _removeFromCart);
@@ -397,8 +402,8 @@ class GuestPageState extends State<GuestPage> {
                         : ElevatedButton(
                       onPressed: null,
                       style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(Colors.grey[600]!),
-                        foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                        backgroundColor: WidgetStateProperty.all<Color>(Colors.grey[600]!),
+                        foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
                       ),
                       child: const Text('Out of Stock', style: TextStyle(fontFamily: 'Roboto Condensed')),
                     ),
