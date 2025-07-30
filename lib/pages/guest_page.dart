@@ -74,7 +74,9 @@ class GuestPageState extends State<GuestPage> {
   Future<void> _fetchPromoImages() async {
     setState(() {
       promoImages = [
-        'https://www.sptoolsusa.com/SC_Assets/homepage-banner-Q22025.jpg'
+        'https://www.sptoolsusa.com/SC_Assets/homepage-banner-Q22025.jpg',
+        'https://www.sptoolsusa.com/SC_Assets/July-2025-1920x720.png',
+        'https://www.sptoolsusa.com/SC_Assets/SPMXCOOL-55qt-rugged-ice-chest-web-banner-v2.gif'
       ];
     });
   }

@@ -28,15 +28,49 @@ class CategoryItemsPage extends StatefulWidget {
 
 class _CategoryItemsPageState extends State<CategoryItemsPage> {
   List<dynamic> categoryItems = [];
+  List<dynamic> filteredCategoryItems = [];
   bool _isLoadingCategoryItems = true;
   String _categoryItemsError = '';
   late int _cartItemCount; // Change to late and use widget's value
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _cartItemCount = widget.cartItemCount; // Initialize from widget parameter
     _fetchCategoryItems();
+    _searchController.addListener(_filterItems);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _filterItems() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      if (query.isEmpty) {
+        filteredCategoryItems = categoryItems;
+      } else {
+        filteredCategoryItems = categoryItems.where((item) {
+          final displayName = item['displayname']?.toString().toLowerCase() ?? '';
+          return displayName.contains(query);
+        }).toList();
+      }
+    });
+  }
+
+  void _toggleSearch() {
+    setState(() {
+      _isSearching = !_isSearching;
+      if (!_isSearching) {
+        _searchController.clear();
+        filteredCategoryItems = categoryItems;
+      }
+    });
   }
 
   Future<void> _fetchCategoryItems() async {
@@ -51,6 +85,7 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
         if (decodedData != null && decodedData['items'] != null && decodedData['items'] is List) {
           setState(() {
             categoryItems = decodedData['items'];
+            filteredCategoryItems = categoryItems; // Initialize filtered list
             _isLoadingCategoryItems = false;
           });
         } else {
@@ -80,8 +115,13 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
       return const Center(child: CircularProgressIndicator(color: Colors.white));
     } else if (_categoryItemsError.isNotEmpty) {
       return Center(child: Text(_categoryItemsError, style: const TextStyle(color: Colors.red, fontFamily: 'Roboto Condensed')));
-    } else if (categoryItems.isEmpty) {
-      return Center(child: Text('No products found in ${widget.categoryName}.', style: const TextStyle(color: Colors.white, fontFamily: 'Roboto Condensed')));
+    } else if (filteredCategoryItems.isEmpty) {
+      return Center(child: Text(
+        _searchController.text.isNotEmpty 
+          ? 'No products found matching "${_searchController.text}".'
+          : 'No products found in ${widget.categoryName}.',
+        style: const TextStyle(color: Colors.white, fontFamily: 'Roboto Condensed')
+      ));
     } else {
       return GridView.builder(
         shrinkWrap: true,
@@ -92,9 +132,9 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
           mainAxisSpacing: 16,
           childAspectRatio: 0.65,
         ),
-        itemCount: categoryItems.length,
+        itemCount: filteredCategoryItems.length,
         itemBuilder: (context, index) {
-          final item = categoryItems[index];
+          final item = filteredCategoryItems[index];
           if (item != null && item['itemid'] != null && item['displayname'] != null && item['pricelevel1_formatted'] != null) {
             return Container(
               decoration: BoxDecoration(
@@ -205,112 +245,160 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: Colors.white,
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-        title: const Text(''),
-        actions: [
-          GestureDetector(
-            onTap: widget.onCartTap, // Use the passed callback to handle cart tap
-            child: Stack(
-              children: [
-                const Icon(
-                  Icons.shopping_cart,
+    return GestureDetector(
+      onTap: () {
+        // Close search bar when tapping outside
+        if (_isSearching) {
+          _toggleSearch();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            color: Colors.white,
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          title: _isSearching 
+            ? Container(
+                height: 40,
+                child: TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  style: const TextStyle(color: Colors.white, fontFamily: 'Roboto Condensed'),
+                  decoration: InputDecoration(
+                    hintText: 'Search products...',
+                    hintStyle: const TextStyle(color: Colors.grey, fontFamily: 'Roboto Condensed'),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.white),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.white),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.white, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: _toggleSearch,
+                    ),
+                  ),
+                ),
+              )
+            : const Text(''),
+          actions: [
+            if (!_isSearching)
+              GestureDetector(
+                onTap: _toggleSearch,
+                child: const Icon(
+                  Icons.search,
                   color: Colors.white,
                   size: 30,
                 ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(1.0),
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 16,
-                      minHeight: 16,
-                    ),
-                    child: Text(
-                      '$_cartItemCount',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Roboto Condensed',
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-        ],
-        backgroundColor: Colors.grey[900],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.categoryName,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontFamily: 'Roboto Condensed',
-                ),
               ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+            const SizedBox(width: 16),
+            GestureDetector(
+              onTap: widget.onCartTap, // Use the passed callback to handle cart tap
+              child: Stack(
                 children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      // TODO: Implement Promotions filter logic
-                      print('Promotions button pressed');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFFF26722),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text('Promotions', style: TextStyle(fontFamily: 'Roboto Condensed')),
+                  const Icon(
+                    Icons.shopping_cart,
+                    color: Colors.white,
+                    size: 30,
                   ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      // TODO: Implement Sort By logic
-                      print('Sort By button pressed');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFFF26722),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(1.0),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        '$_cartItemCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Roboto Condensed',
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
-                    child: const Text('Sort By', style: TextStyle(fontFamily: 'Roboto Condensed')),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              _buildCategoryItemsGrid(),
-            ],
+            ),
+            const SizedBox(width: 16),
+          ],
+          backgroundColor: Colors.grey[900],
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.categoryName,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontFamily: 'Roboto Condensed',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        // TODO: Implement Promotions filter logic
+                        print('Promotions button pressed');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFFF26722),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Promotions', style: TextStyle(fontFamily: 'Roboto Condensed')),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        // TODO: Implement Sort By logic
+                        print('Sort By button pressed');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFFF26722),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Sort By', style: TextStyle(fontFamily: 'Roboto Condensed')),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildCategoryItemsGrid(),
+              ],
+            ),
           ),
         ),
       ),
