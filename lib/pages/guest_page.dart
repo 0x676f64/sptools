@@ -4,6 +4,7 @@ import '/pages/products_page.dart';
 import '/pages/wishlist_page.dart';
 import '/pages/orders_page.dart';
 import '/pages/more_page.dart';
+import '/pages/product_detail_page.dart'; // Add this import
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -62,6 +63,21 @@ class GuestPageState extends State<GuestPage> {
     setState(() {
       _selectedIndex = 3; // Navigate to Orders page
     });
+  }
+
+  // Add method to navigate to product detail page
+  void _navigateToProductDetail(Map<String, dynamic> product) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProductDetailPage(
+          product: product,
+          toggleWishlistItem: _toggleWishlistItem,
+          isItemInWishlist: isItemInWishlist,
+          onAddToCart: _addToCart,
+        ),
+      ),
+    );
   }
 
   @override
@@ -220,7 +236,17 @@ class GuestPageState extends State<GuestPage> {
           },
         );
       case 3:
-        return OrdersView(cartItems: _cartItems, onRemoveFromCart: _removeFromCart);
+        return OrdersView(
+          cartItems: _cartItems,
+          onRemoveFromCart: _removeFromCart,
+          onUpdateQuantity: (int index, int newQuantity) {
+            setState(() {
+              if (index >= 0 && index < _cartItems.length) {
+                _cartItems[index]['quantity'] = newQuantity;
+              }
+            });
+          },
+        );
       case 4:
         return const MoreView();
       default:
@@ -329,35 +355,41 @@ class GuestPageState extends State<GuestPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  SizedBox(
-                    height: 120.0,
-                    child: Center(
-                      child: item['itemimages_detail'] != null &&
-                          item['itemimages_detail']['urls'] != null &&
-                          item['itemimages_detail']['urls'].isNotEmpty &&
-                          item['itemimages_detail']['urls'][0]['url'] != null
-                          ? Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Image.network(
-                          item['itemimages_detail']['urls'][0]['url'],
-                          fit: BoxFit.contain,
-                        ),
-                      )
-                          : const SizedBox.shrink(),
+                  GestureDetector( // Wrap the image with GestureDetector
+                    onTap: () => _navigateToProductDetail(item), // Navigate to detail page
+                    child: SizedBox(
+                      height: 120.0,
+                      child: Center(
+                        child: item['itemimages_detail'] != null &&
+                            item['itemimages_detail']['urls'] != null &&
+                            item['itemimages_detail']['urls'].isNotEmpty &&
+                            item['itemimages_detail']['urls'][0]['url'] != null
+                            ? Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Image.network(
+                            item['itemimages_detail']['urls'][0]['url'],
+                            fit: BoxFit.contain,
+                          ),
+                        )
+                            : const SizedBox.shrink(),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    item['displayname'],
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      fontFamily: 'Roboto Condensed',
+                  GestureDetector( // Also make the product name clickable
+                    onTap: () => _navigateToProductDetail(item),
+                    child: Text(
+                      item['displayname'],
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        fontFamily: 'Roboto Condensed',
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
                   Row(
